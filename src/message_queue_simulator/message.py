@@ -6,7 +6,7 @@ from message_queue_simulator.priority import Priority
 
 
 @dataclass(frozen=True)
-class Message():
+class Message:
     payload: dict
     priority: Priority = Priority.MEDIUM
     id: UUID = field(default_factory=uuid4)
