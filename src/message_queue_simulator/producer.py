@@ -2,6 +2,7 @@ import time
 from threading import Thread
 from typing import Callable, Optional
 
+from message_queue_simulator.exceptions import QueueFullError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
 
@@ -48,5 +49,8 @@ class Producer:
 
     def _run(self) -> None:
         while self.is_running():
-            self.produce()
+            try:
+                self.produce()
+            except QueueFullError:
+                pass
             time.sleep(self._interval)

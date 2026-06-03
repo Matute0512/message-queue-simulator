@@ -79,6 +79,23 @@ def test_producer_counts_produced_messages() -> None:
     assert producer.produced_count() == 2
 
 
+def test_producer_handles_queue_full_error_grecefully() -> None:
+    queue = MessageQueue(max_size=1)
+
+    queue.enqueue(Message(payload={"task": "initial"}))
+
+    producer = Producer(queue=queue, message_factory=_create_message)
+    producer.start()
+
+    time.sleep(0.05)
+
+    producer.stop()
+
+    assert queue.size() == 1
+
+    assert producer.produced_count() == 0
+
+
 # ==========================================
 # 2. AUXILIARY FUNCTIONS
 # ==========================================
