@@ -37,7 +37,6 @@ def test_producer_uses_message_factory() -> None:
 
 def test_producer_starts_running() -> None:
     queue = MessageQueue()
-    expected_message = Message(payload={"task": "custom"})
 
     producer = Producer(queue=queue, message_factory=_create_message)
     producer.start()
@@ -47,7 +46,6 @@ def test_producer_starts_running() -> None:
 
 def test_producer_stops_running() -> None:
     queue = MessageQueue()
-    expected_message = Message(payload={"task": "custom"})
 
     producer = Producer(queue=queue, message_factory=_create_message)
     producer.start()
@@ -66,6 +64,19 @@ def test_producer_generates_messages_while_running() -> None:
     producer.stop()
 
     assert queue.size() > 0
+
+
+def test_producer_counts_produced_messages() -> None:
+    queue = MessageQueue()
+
+    producer = Producer(queue=queue, message_factory=_create_message)
+
+    assert producer.produced_count() == 0
+
+    producer.produce()
+    producer.produce()
+
+    assert producer.produced_count() == 2
 
 
 # ==========================================

@@ -11,10 +11,7 @@ def test_consumer_starts_running() -> None:
     def handle_message(message: Message) -> None:
         pass
 
-    consumer = Consumer(
-        queue=queue,
-        message_handler=handle_message
-    )
+    consumer = Consumer(queue=queue, message_handler=handle_message)
 
     consumer.start()
 
@@ -27,10 +24,7 @@ def test_consumer_stops_running() -> None:
     def handle_message(message: Message) -> None:
         pass
 
-    consumer = Consumer(
-        queue=queue,
-        message_handler=handle_message
-    )
+    consumer = Consumer(queue=queue, message_handler=handle_message)
 
     consumer.start()
     consumer.stop()
@@ -45,16 +39,11 @@ def test_consumer_processes_messages_while_running() -> None:
     def handle_message(message: Message) -> None:
         processed_messages.append(message)
 
-    message = Message(
-        payload={"task": "email"}
-    )
+    message = Message(payload={"task": "email"})
 
     queue.enqueue(message)
 
-    consumer = Consumer(
-        queue=queue,
-        message_handler=handle_message
-    )
+    consumer = Consumer(queue=queue, message_handler=handle_message)
 
     consumer.start()
 
@@ -64,3 +53,24 @@ def test_consumer_processes_messages_while_running() -> None:
 
     assert len(processed_messages) == 1
     assert processed_messages[0] == message
+
+
+def test_consumer_counts_processed_messages() -> None:
+    queue = MessageQueue()
+
+    for _ in range(3):
+        queue.enqueue(Message(payload={"task": "test"}))
+
+    def handle_message(message: Message) -> None:
+        pass
+
+    consumer = Consumer(queue=queue, message_handler=handle_message)
+
+    assert consumer.processed_count() == 0
+
+    consumer.start()
+
+    time.sleep(0.05)
+    consumer.stop()
+
+    assert consumer.processed_count() == 3

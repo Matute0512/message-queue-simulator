@@ -1,31 +1,34 @@
-from typing import Callable, Optional
+import time
 from threading import Thread
+from typing import Callable, Optional
+
 from message_queue_simulator.exceptions import QueueEmptyError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
-
-import time
 
 
 class Consumer:
 
     def __init__(
-        self,
-        queue: MessageQueue,
-        message_handler: Callable[[Message], None]
+        self, queue: MessageQueue, message_handler: Callable[[Message], None]
     ) -> None:
         self._queue = queue
         self._message_handler = message_handler
+
         self._running = False
         self._thread: Optional[Thread] = None
+
         self._interval = 0.01
+
+        self._processed_count = 0
+
+    def processed_count(self) -> int:
+        return self._processed_count
 
     def start(self) -> None:
         self._running = True
 
-        self._thread = Thread(
-            target=self._run
-        )
+        self._thread = Thread(target=self._run)
 
         self._thread.start()
 
@@ -43,6 +46,6 @@ class Consumer:
             try:
                 message = self._queue.dequeue()
                 self._message_handler(message)
-
+                self._processed_count += 1
             except QueueEmptyError:
                 time.sleep(self._interval)

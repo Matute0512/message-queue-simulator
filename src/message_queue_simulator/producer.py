@@ -21,9 +21,15 @@ class Producer:
 
         self._interval = 0.01
 
+        self._produced_count = 0
+
     def produce(self) -> None:
         message = self._message_factory()
         self._queue.enqueue(message)
+        self._produced_count += 1
+
+    def produced_count(self) -> int:
+        return self._produced_count
 
     def start(self) -> None:
         self._running = True
