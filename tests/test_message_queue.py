@@ -1,6 +1,6 @@
 import pytest
 
-from message_queue_simulator.exceptions import QueueEmptyError
+from message_queue_simulator.exceptions import QueueEmptyError, QueueFullError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
 from message_queue_simulator.priority import Priority
@@ -76,3 +76,19 @@ def test_messages_with_same_priority_are_processed_fifo():
 
     assert queue.dequeue() == first_message
     assert queue.dequeue() == second_message
+
+
+def test_queue_can_have_a_max_size() -> None:
+    queue = MessageQueue(max_size=2)
+
+    queue.enqueue(Message(payload={"task": "1"}))
+    queue.enqueue(Message(payload={"task": "2"}))
+
+    assert queue.size() == 2
+
+
+def test_enqueue_to_a_full_queue_raises_exception() -> None:
+    queue = MessageQueue(max_size=1)
+    queue.enqueue(Message(payload={"task": "mail"}))
+    with pytest.raises(QueueFullError):
+        queue.enqueue(Message(payload={"task": "send"}))
