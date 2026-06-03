@@ -1,3 +1,6 @@
+"""Custom exceptions for the message queue simulator."""
+
+
 class QueueEmptyError(Exception):
     "Raised when attempting to dequeue from an empty queue."
 
