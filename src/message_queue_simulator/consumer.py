@@ -2,39 +2,34 @@ import time
 from threading import Thread
 from typing import Callable, Optional
 
+from message_queue_simulator.exceptions import QueueEmptyError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
 
 
-class Producer:
+class Consumer:
+
     def __init__(
-        self,
-        queue: MessageQueue,
-        message_factory: Callable[[], Message],
+        self, queue: MessageQueue, message_handler: Callable[[Message], None]
     ) -> None:
         self._queue = queue
-        self._message_factory = message_factory
+        self._message_handler = message_handler
 
-        self._thread: Optional[Thread] = None
         self._running = False
-        self._thread = None
+        self._thread: Optional[Thread] = None
 
         self._interval = 0.01
 
-        self._produced_count = 0
+        self._processed_count = 0
 
-    def produce(self) -> None:
-        message = self._message_factory()
-        self._queue.enqueue(message)
-        self._produced_count += 1
-
-    def produced_count(self) -> int:
-        return self._produced_count
+    def processed_count(self) -> int:
+        return self._processed_count
 
     def start(self) -> None:
         self._running = True
 
         self._thread = Thread(target=self._run)
+
         self._thread.start()
 
     def stop(self) -> None:
@@ -48,5 +43,9 @@ class Producer:
 
     def _run(self) -> None:
         while self.is_running():
-            self.produce()
-            time.sleep(self._interval)
+            try:
+                message = self._queue.dequeue()
+                self._message_handler(message)
+                self._processed_count += 1
+            except QueueEmptyError:
+                time.sleep(self._interval)
