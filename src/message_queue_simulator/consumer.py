@@ -1,5 +1,6 @@
 """Consumer component for the message queue system."""
 
+import logging
 import time
 from threading import Thread
 from typing import Callable, Optional
@@ -7,6 +8,8 @@ from typing import Callable, Optional
 from message_queue_simulator.exceptions import QueueEmptyError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
+
+logger = logging.getLogger(__name__)
 
 
 class Consumer:
@@ -69,7 +72,8 @@ class Consumer:
                 message = self._queue.dequeue()
                 self._message_handler(message)
                 self._processed_count += 1
+                logger.info(f"Consumed message {message.id}")
             except QueueEmptyError:
                 # Queue is empty: wait for producers to enqueue new messages
                 pass
-                time.sleep(self._interval)
+            time.sleep(self._interval)
