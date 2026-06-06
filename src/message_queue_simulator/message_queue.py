@@ -5,6 +5,8 @@ from queue import PriorityQueue
 from typing import Optional
 
 from message_queue_simulator.exceptions import QueueEmptyError, QueueFullError
+from message_queue_simulator.message import Message
+from message_queue_simulator.priority import Priority
 
 logger = logging.getLogger(__name__)
 
@@ -18,29 +20,18 @@ class MessageQueue:
     """
 
     def __init__(self, max_size: Optional[int] = None) -> None:
-        """Initializes the message queue.
+        """Initializes the message queue."""
+        # Le indicamos a mypy exactamente qué contiene la tupla:
+        # (Prioridad, Secuencia, Mensaje)
+        self._queue: PriorityQueue[tuple[Priority, int, Message]] = PriorityQueue()
+        self._sequence_number: int = 0
+        self._max_size: Optional[int] = max_size
 
-        Args:
-            - max_size (int, optional): The maximum number of messages the queue
-                can hold. If None, the queue has infinite capacity.
-        """
-        self._queue = PriorityQueue()
-        self._sequence_number = 0
-        self._max_size = max_size
-
-    def enqueue(self, message):
-        """Adds a message to the queue based on its priority.
-
-        Args:
-            - message (Message): The message to be added.
-
-        Raises:
-            - QueueFullError: If the queue has reached its max_size limit.
-        """
-
+    def enqueue(self, message: Message) -> None:
+        """Adds a message to the queue based on its priority."""
         if self._max_size is not None and self.size() >= self._max_size:
             logger.warning("Queue is full! Enqueue rejected.")
-            raise QueueFullError
+            raise QueueFullError()
 
         # Tuple structure: (priority, sequence_number, message)
         # Sequence number ensures FIFO order for identical priorities
@@ -50,15 +41,8 @@ class MessageQueue:
             f"Enqueued message {message.id} (Priority: {message.priority.name})"
         )
 
-    def dequeue(self):
-        """Removes and returns the highest priority message from the queue.
-
-        Returns:
-            - Message: The retrieved message.
-
-        Raises:
-            - QueueEmptyError: If the queue has no messages.
-        """
+    def dequeue(self) -> Message:
+        """Removes and returns the highest priority message from the queue."""
         if self.is_empty():
             raise QueueEmptyError()
 
@@ -66,10 +50,10 @@ class MessageQueue:
         logger.debug(f"Dequeued message {message.id}")
         return message
 
-    def size(self):
+    def size(self) -> int:
         """Returns the current number of messages in the queue."""
         return self._queue.qsize()
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         """Checks if the queue contains no messages."""
         return self.size() == 0

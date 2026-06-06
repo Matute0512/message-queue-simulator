@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any
 from uuid import UUID, uuid4
 
 from message_queue_simulator.priority import Priority
@@ -18,7 +19,7 @@ class Message:
         - created_at (datetime): The exact time the message was created, auto-generated.
     """
 
-    payload: dict
+    payload: dict[str, Any]
     priority: Priority = Priority.MEDIUM
     # Use default_factory to generate unique values for each instance
     id: UUID = field(default_factory=uuid4)
