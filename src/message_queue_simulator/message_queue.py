@@ -1,9 +1,12 @@
 """Thread-safe priority message queue implementation."""
 
+import logging
 from queue import PriorityQueue
 from typing import Optional
 
 from message_queue_simulator.exceptions import QueueEmptyError, QueueFullError
+
+logger = logging.getLogger(__name__)
 
 
 class MessageQueue:
@@ -36,12 +39,16 @@ class MessageQueue:
         """
 
         if self._max_size is not None and self.size() >= self._max_size:
+            logger.warning("Queue is full! Enqueue rejected.")
             raise QueueFullError
 
         # Tuple structure: (priority, sequence_number, message)
         # Sequence number ensures FIFO order for identical priorities
         self._queue.put((message.priority, self._sequence_number, message))
         self._sequence_number += 1
+        logger.debug(
+            f"Enqueued message {message.id} (Priority: {message.priority.name})"
+        )
 
     def dequeue(self):
         """Removes and returns the highest priority message from the queue.
@@ -56,6 +63,7 @@ class MessageQueue:
             raise QueueEmptyError()
 
         _, _, message = self._queue.get()
+        logger.debug(f"Dequeued message {message.id}")
         return message
 
     def size(self):

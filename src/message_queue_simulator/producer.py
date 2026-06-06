@@ -1,5 +1,6 @@
 """Producer component for the message queue system."""
 
+import logging
 import time
 from threading import Thread
 from typing import Callable, Optional
@@ -7,6 +8,8 @@ from typing import Callable, Optional
 from message_queue_simulator.exceptions import QueueFullError
 from message_queue_simulator.message import Message
 from message_queue_simulator.message_queue import MessageQueue
+
+logger = logging.getLogger(__name__)
 
 
 class Producer:
@@ -43,6 +46,7 @@ class Producer:
         message = self._message_factory()
         self._queue.enqueue(message)
         self._produced_count += 1
+        logger.debug(f"Produced message {message.id}")
 
     def produced_count(self) -> int:
         """Returns the total number of successfully enqueued messages."""
