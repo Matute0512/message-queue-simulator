@@ -1,7 +1,7 @@
 """Message entity definition."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -23,4 +23,5 @@ class Message:
     priority: Priority = Priority.MEDIUM
     # Use default_factory to generate unique values for each instance
     id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc))
